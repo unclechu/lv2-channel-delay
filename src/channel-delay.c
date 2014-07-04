@@ -64,12 +64,12 @@ static LV2_Handle instantiate (
 ) {
 	Stereo *plugin = (Stereo *)malloc(sizeof(Stereo));
 
-    samplerate = rate;
-    buffer_l = malloc( round((samplerate / 1000.0) * MAX_DELAY_MS) * sizeof(float) );
-    buffer_r = malloc( round((samplerate / 1000.0) * MAX_DELAY_MS) * sizeof(float) );
+	samplerate = rate;
+	buffer_l = malloc( round((samplerate / 1000.0) * MAX_DELAY_MS) * sizeof(float) );
+	buffer_r = malloc( round((samplerate / 1000.0) * MAX_DELAY_MS) * sizeof(float) );
 
 #ifdef DEBUG
-    printf("Sample rate: %d\n", (int)samplerate);
+	printf("Sample rate: %d\n", (int)samplerate);
 #endif
 
 	return (LV2_Handle)plugin;
@@ -125,75 +125,75 @@ static void send_stereo_run (
 	const float gain_r = *(plugin->gain_r);
 	const float delay_r = *(plugin->delay_r);
 
-    float gain_l_val = 0;
-    float gain_r_val = 0;
-    if (gain_l > -90) gain_l_val = DB_CO( gain_l );
-    if (gain_r > -90) gain_r_val = DB_CO( gain_r );
+	float gain_l_val = 0;
+	float gain_r_val = 0;
+	if (gain_l > -90) gain_l_val = DB_CO( gain_l );
+	if (gain_r > -90) gain_r_val = DB_CO( gain_r );
 
-    if (last_delay_ms_l != delay_l) {
-        last_delay_ms_l = delay_l;
-        last_delay_samples_l = round((samplerate / 1000.0) * last_delay_ms_l);
-        sample_i_l = -last_delay_samples_l;
+	if (last_delay_ms_l != delay_l) {
+		last_delay_ms_l = delay_l;
+		last_delay_samples_l = round((samplerate / 1000.0) * last_delay_ms_l);
+		sample_i_l = -last_delay_samples_l;
 #ifdef DEBUG
-        printf("New L delay in samples: %d\n", last_delay_samples_l);
+		printf("New L delay in samples: %d\n", last_delay_samples_l);
 #endif
-    }
+	}
 
-    if (last_delay_ms_r != delay_r) {
-        last_delay_ms_r = delay_r;
-        last_delay_samples_r = round((samplerate / 1000.0) * last_delay_ms_r);
-        sample_i_r = -last_delay_samples_r;
+	if (last_delay_ms_r != delay_r) {
+		last_delay_ms_r = delay_r;
+		last_delay_samples_r = round((samplerate / 1000.0) * last_delay_ms_r);
+		sample_i_r = -last_delay_samples_r;
 #ifdef DEBUG
-        printf("New R delay in samples: %d\n", last_delay_samples_r);
+		printf("New R delay in samples: %d\n", last_delay_samples_r);
 #endif
-    }
+	}
 
 	uint32_t i;
 	for (i=0; i<n_samples; i++) {
 
-        // left
+		// left
 
-        if (sample_i_l >= last_delay_samples_l) sample_i_l = 0;
+		if (sample_i_l >= last_delay_samples_l) sample_i_l = 0;
 
-        if (sample_i_l < 0) {
-            output_l[i] = 0;
-            buffer_l[ sample_i_l + last_delay_samples_l ] = input_l[i];
-        } else {
-            if (last_delay_samples_l == 0) {
-                output_l[i] = input_l[i] * gain_l_val;
-            } else {
-                output_l[i] = buffer_l[ sample_i_l ] * gain_l_val;
-                if (sample_i_l - 1 < 0) {
-                    buffer_l[ last_delay_samples_l - 1 ] = input_l[i];
-                } else {
-                    buffer_l[ sample_i_l - 1 ] = input_l[i];
-                }
-            }
-        }
+		if (sample_i_l < 0) {
+			output_l[i] = 0;
+			buffer_l[ sample_i_l + last_delay_samples_l ] = input_l[i];
+		} else {
+			if (last_delay_samples_l == 0) {
+				output_l[i] = input_l[i] * gain_l_val;
+			} else {
+				output_l[i] = buffer_l[ sample_i_l ] * gain_l_val;
+				if (sample_i_l - 1 < 0) {
+					buffer_l[ last_delay_samples_l - 1 ] = input_l[i];
+				} else {
+					buffer_l[ sample_i_l - 1 ] = input_l[i];
+				}
+			}
+		}
 
-        sample_i_l++;
+		sample_i_l++;
 
-        // right
+		// right
 
-        if (sample_i_r >= last_delay_samples_r) sample_i_r = 0;
+		if (sample_i_r >= last_delay_samples_r) sample_i_r = 0;
 
-        if (sample_i_r < 0) {
-            output_r[i] = 0;
-            buffer_r[ sample_i_r + last_delay_samples_r ] = input_r[i];
-        } else {
-            if (last_delay_samples_r == 0) {
-                output_r[i] = input_r[i] * gain_r_val;
-            } else {
-                output_r[i] = buffer_r[ sample_i_r ] * gain_r_val;
-                if (sample_i_r - 1 < 0) {
-                    buffer_r[ last_delay_samples_r - 1 ] = input_r[i];
-                } else {
-                    buffer_r[ sample_i_r - 1 ] = input_r[i];
-                }
-            }
-        }
+		if (sample_i_r < 0) {
+			output_r[i] = 0;
+			buffer_r[ sample_i_r + last_delay_samples_r ] = input_r[i];
+		} else {
+			if (last_delay_samples_r == 0) {
+				output_r[i] = input_r[i] * gain_r_val;
+			} else {
+				output_r[i] = buffer_r[ sample_i_r ] * gain_r_val;
+				if (sample_i_r - 1 < 0) {
+					buffer_r[ last_delay_samples_r - 1 ] = input_r[i];
+				} else {
+					buffer_r[ sample_i_r - 1 ] = input_r[i];
+				}
+			}
+		}
 
-        sample_i_r++;
+		sample_i_r++;
 
 	}
 }
@@ -201,8 +201,8 @@ static void send_stereo_run (
 // destroy
 static void cleanup ( LV2_Handle instance ) {
 	free( instance );
-    free( buffer_l );
-    free( buffer_r );
+	free( buffer_l );
+	free( buffer_r );
 }
 
 static const LV2_Descriptor stereo_descriptor = {
