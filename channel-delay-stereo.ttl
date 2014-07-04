@@ -1,6 +1,5 @@
 @prefix lv2:  <http://lv2plug.in/ns/lv2core#>.
 @prefix doap: <http://usefulinc.com/ns/doap#>.
-@prefix ll: <http://ll-plugins.nongnu.org/lv2/namespace#>.
 @prefix pg: <http://ll-plugins.nongnu.org/lv2/ext/portgroups#>.
 
 @prefix pss: <https://github.com/unclechu/lv2-channel-delay/channel-delay-stereo>.
@@ -12,7 +11,6 @@ pss:
     lv2:binary <channel-delay.so>;
     doap:name "Channel Delay (Stereo)";
     doap:license <https://github.com/unclechu/lv2-channel-delay/blob/master/LICENSE>;
-    ll:pegName "p_send_s";
 
     lv2:port [
         a lv2:AudioPort, lv2:InputPort;
