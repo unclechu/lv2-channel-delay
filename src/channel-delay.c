@@ -75,7 +75,7 @@ static LV2_Handle instantiate (
 	return (LV2_Handle)plugin;
 }
 
-static void send_stereo_connect_port (
+static void connect_port (
 	LV2_Handle instance,
 	uint32_t port,
 	void* data
@@ -110,7 +110,7 @@ static void send_stereo_connect_port (
 	}
 }
 
-static void send_stereo_run (
+static void run (
 	LV2_Handle instance,
 	uint32_t n_samples
 ) {
@@ -208,9 +208,9 @@ static void cleanup ( LV2_Handle instance ) {
 static const LV2_Descriptor stereo_descriptor = {
 	URI_STEREO,
 	instantiate,
-	send_stereo_connect_port,
+	connect_port,
 	NULL,
-	send_stereo_run,
+	run,
 	NULL,
 	cleanup
 };
