@@ -56,7 +56,7 @@ typedef struct {
 	const float* delay_r;
 } Stereo;
 
-static LV2_Handle instantiate (
+static LV2_Handle instantiate ( // {{{1
 	const LV2_Descriptor *descriptor,
 	double rate,
 	const char *bundle_path,
@@ -73,9 +73,9 @@ static LV2_Handle instantiate (
 #endif
 
 	return (LV2_Handle)plugin;
-}
+} // instantiate }}}1
 
-static void connect_port (
+static void connect_port ( // {{{1
 	LV2_Handle instance,
 	uint32_t port,
 	void* data
@@ -108,9 +108,9 @@ static void connect_port (
 		plugin->delay_r = (const float *)data;
 		break;
 	}
-}
+} // connect_port() }}}1
 
-static void run (
+static void run ( // {{{1
 	LV2_Handle instance,
 	uint32_t n_samples
 ) {
@@ -156,7 +156,7 @@ static void run (
 	uint32_t i;
 	for (i=0; i<n_samples; i++) {
 
-		// left
+		// left {{{2
 
 		if (sample_i_l >= last_delay_samples_l) sample_i_l = 0;
 
@@ -178,7 +178,9 @@ static void run (
 
 		sample_i_l++;
 
-		// right
+		// left }}}2
+
+		// right {{{2
 
 		if (sample_i_r >= last_delay_samples_r) sample_i_r = 0;
 
@@ -200,8 +202,10 @@ static void run (
 
 		sample_i_r++;
 
+		// right }}}2
+
 	}
-}
+} // run() }}}1
 
 // destroy
 static void cleanup ( LV2_Handle instance ) {
