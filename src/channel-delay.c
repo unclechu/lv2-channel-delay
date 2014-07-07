@@ -29,10 +29,10 @@ float *buffer_l;
 float *buffer_r;
 float last_delay_ms_l = -1;
 float last_delay_ms_r = -1;
-int last_delay_samples_l = -1;
-int last_delay_samples_r = -1;
-int sample_i_l = 0;
-int sample_i_r = 0;
+int32_t last_delay_samples_l = -1;
+int32_t last_delay_samples_r = -1;
+int32_t sample_i_l = 0;
+int32_t sample_i_r = 0;
 
 typedef enum {
 	stereo_input_l = 0,
@@ -162,12 +162,12 @@ static void run (
 			if (last_delay_samples_l == 0) {
 				output_l[i] = input_l[i] * gain_l_val;
 			} else {
-				output_l[i] = buffer_l[ sample_i_l ] * gain_l_val;
 				if (sample_i_l - 1 < 0) {
 					buffer_l[ last_delay_samples_l - 1 ] = input_l[i];
 				} else {
 					buffer_l[ sample_i_l - 1 ] = input_l[i];
 				}
+				output_l[i] = buffer_l[ sample_i_l ] * gain_l_val;
 			}
 		}
 
@@ -184,12 +184,12 @@ static void run (
 			if (last_delay_samples_r == 0) {
 				output_r[i] = input_r[i] * gain_r_val;
 			} else {
-				output_r[i] = buffer_r[ sample_i_r ] * gain_r_val;
 				if (sample_i_r - 1 < 0) {
 					buffer_r[ last_delay_samples_r - 1 ] = input_r[i];
 				} else {
 					buffer_r[ sample_i_r - 1 ] = input_r[i];
 				}
+				output_r[i] = buffer_r[ sample_i_r ] * gain_r_val;
 			}
 		}
 
