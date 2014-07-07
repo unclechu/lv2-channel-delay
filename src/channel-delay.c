@@ -125,10 +125,8 @@ static void run (
 	const float gain_r = *(plugin->gain_r);
 	const float delay_r = *(plugin->delay_r);
 
-	float gain_l_val = 0;
-	float gain_r_val = 0;
-	if (gain_l > -90) gain_l_val = DB_CO( gain_l );
-	if (gain_r > -90) gain_r_val = DB_CO( gain_r );
+	float gain_l_val = DB_CO( gain_l );
+	float gain_r_val = DB_CO( gain_r );
 
 	if (last_delay_ms_l != delay_l) {
 		last_delay_ms_l = delay_l;
