@@ -128,8 +128,15 @@ static void run (
 	float gain_l_val = DB_CO( gain_l );
 	float gain_r_val = DB_CO( gain_r );
 
-	if (last_delay_ms_l != delay_l) {
-		last_delay_ms_l = delay_l;
+	float delay_l_val = delay_l;
+	if (delay_l_val < 0) delay_l_val = 0;
+	if (delay_l_val > MAX_DELAY_MS) delay_l_val = MAX_DELAY_MS;
+	float delay_r_val = delay_r;
+	if (delay_r_val < 0) delay_r_val = 0;
+	if (delay_r_val > MAX_DELAY_MS) delay_r_val = MAX_DELAY_MS;
+
+	if (last_delay_ms_l != delay_l_val) {
+		last_delay_ms_l = delay_l_val;
 		last_delay_samples_l = round((samplerate / 1000.0) * last_delay_ms_l);
 		sample_i_l = -last_delay_samples_l;
 #ifdef DEBUG
@@ -137,8 +144,8 @@ static void run (
 #endif
 	}
 
-	if (last_delay_ms_r != delay_r) {
-		last_delay_ms_r = delay_r;
+	if (last_delay_ms_r != delay_r_val) {
+		last_delay_ms_r = delay_r_val;
 		last_delay_samples_r = round((samplerate / 1000.0) * last_delay_ms_r);
 		sample_i_r = -last_delay_samples_r;
 #ifdef DEBUG
