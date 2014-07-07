@@ -171,7 +171,6 @@ static void run ( // {{{1
 			if (*sample_i >= last_delay_samples) *sample_i = 0;
 
 			if (*sample_i < 0) {
-				//printf("%d %f\n", *sample_i, input);
 				buffer[ (*sample_i) + last_delay_samples ] = input;
 				*output = 0;
 			} else {
