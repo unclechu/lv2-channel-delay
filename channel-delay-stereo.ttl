@@ -2,15 +2,16 @@
 @prefix doap: <http://usefulinc.com/ns/doap#>.
 @prefix pg: <http://ll-plugins.nongnu.org/lv2/ext/portgroups#>.
 
-@prefix pss: <https://github.com/unclechu/lv2-channel-delay/channel-delay-stereo>.
+@prefix p: <https://github.com/unclechu/lv2-channel-delay/channel-delay-stereo>.
 
-pss:in a pg:StereoGroup.
-pss:out a pg:StereoGroup.
-pss:
+p:in a pg:StereoGroup.
+p:out a pg:StereoGroup.
+p:
     a lv2:Plugin, lv2:MixerPlugin;
     lv2:binary <channel-delay.so>;
     doap:name "Channel Delay (Stereo)";
-    doap:license <https://github.com/unclechu/lv2-channel-delay/blob/master/LICENSE>;
+	doap:maintainer [ foaf:name "Viacheslav Lotsmanov"; ];
+	doap:license <http://usefulinc.com/doap/licenses/lgpl>;
 
     lv2:port [
         a lv2:AudioPort, lv2:InputPort;
@@ -18,7 +19,7 @@ pss:
         lv2:symbol "input_l";
         lv2:name "Left input";
         pg:membership [
-            pg:group pss:in;
+            pg:group p:in;
             pg:role pg:leftChannel;
         ];
     ], [
@@ -27,7 +28,7 @@ pss:
         lv2:symbol "input_r";
         lv2:name "Right input";
         pg:membership [
-            pg:group pss:in;
+            pg:group p:in;
             pg:role pg:rightChannel;
         ];
     ], [
@@ -36,7 +37,7 @@ pss:
         lv2:symbol "output_l";
         lv2:name "Left output";
         pg:membership [
-            pg:group pss:out;
+            pg:group p:out;
             pg:role pg:leftChannel;
         ];
     ], [
@@ -45,7 +46,7 @@ pss:
         lv2:symbol "output_r";
         lv2:name "Right output";
         pg:membership [
-            pg:group pss:out;
+            pg:group p:out;
             pg:role pg:rightChannel;
         ];
     ], [
