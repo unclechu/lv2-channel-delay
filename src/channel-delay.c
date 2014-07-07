@@ -65,8 +65,8 @@ static LV2_Handle instantiate ( // {{{1
 	Stereo *plugin = (Stereo *)malloc(sizeof(Stereo));
 
 	samplerate = rate;
-	buffer_l = malloc( round((samplerate / 1000.0) * MAX_DELAY_MS) * sizeof(float) );
-	buffer_r = malloc( round((samplerate / 1000.0) * MAX_DELAY_MS) * sizeof(float) );
+	buffer_l = (float *)malloc( round((samplerate / 1000.0) * MAX_DELAY_MS) * sizeof(float) );
+	buffer_r = (float *)malloc( round((samplerate / 1000.0) * MAX_DELAY_MS) * sizeof(float) );
 
 #ifdef DEBUG
 	printf("Sample rate: %d\n", (int)samplerate);
@@ -128,81 +128,70 @@ static void run ( // {{{1
 	float gain_l_val = DB_CO( gain_l );
 	float gain_r_val = DB_CO( gain_r );
 
-	float delay_l_val = delay_l;
-	if (delay_l_val < 0) delay_l_val = 0;
-	if (delay_l_val > MAX_DELAY_MS) delay_l_val = MAX_DELAY_MS;
-	float delay_r_val = delay_r;
-	if (delay_r_val < 0) delay_r_val = 0;
-	if (delay_r_val > MAX_DELAY_MS) delay_r_val = MAX_DELAY_MS;
-
-	if (last_delay_ms_l != delay_l_val) {
-		last_delay_ms_l = delay_l_val;
-		last_delay_samples_l = round((samplerate / 1000.0) * last_delay_ms_l);
-		sample_i_l = -last_delay_samples_l;
-#ifdef DEBUG
-		printf("New L delay in samples: %d\n", last_delay_samples_l);
-#endif
+	inline float prepareDelay(float delay) {
+		if (delay < 0) return 0;
+		else if (delay > MAX_DELAY_MS) return MAX_DELAY_MS;
+		else return delay;
 	}
 
-	if (last_delay_ms_r != delay_r_val) {
-		last_delay_ms_r = delay_r_val;
-		last_delay_samples_r = round((samplerate / 1000.0) * last_delay_ms_r);
-		sample_i_r = -last_delay_samples_r;
+	float delay_l_val = prepareDelay(delay_l);
+	float delay_r_val = prepareDelay(delay_r);
+
+	inline float initDelay(
+		float delay,
+		float *last_delay_ms,
+		int32_t *last_delay_samples,
+		int32_t *sample_i,
+		char *channelName
+	) {
+		if (*last_delay_ms != delay) {
+			*last_delay_ms = delay;
+			*last_delay_samples = round((samplerate / 1000.0) * (*last_delay_ms));
+			*sample_i = -(*last_delay_samples);
 #ifdef DEBUG
-		printf("New R delay in samples: %d\n", last_delay_samples_r);
+			printf("New %s delay in samples: %d\n", channelName, *last_delay_samples);
 #endif
+		}
 	}
+
+	initDelay(delay_l_val, &last_delay_ms_l, &last_delay_samples_l, &sample_i_l, "L");
+	initDelay(delay_r_val, &last_delay_ms_r, &last_delay_samples_r, &sample_i_r, "R");
 
 	uint32_t i;
 	for (i=0; i<n_samples; i++) {
 
-		// left {{{2
+		void chProc(
+			float input,
+			float *output,
+			float *buffer,
+			int32_t *sample_i,
+			int32_t last_delay_samples,
+			float gain
+		) {
+			if (*sample_i >= last_delay_samples) *sample_i = 0;
 
-		if (sample_i_l >= last_delay_samples_l) sample_i_l = 0;
-
-		if (sample_i_l < 0) {
-			output_l[i] = 0;
-			buffer_l[ sample_i_l + last_delay_samples_l ] = input_l[i];
-		} else {
-			if (last_delay_samples_l == 0) {
-				output_l[i] = input_l[i] * gain_l_val;
+			if (*sample_i < 0) {
+				//printf("%d %f\n", *sample_i, input);
+				buffer[ (*sample_i) + last_delay_samples ] = input;
+				*output = 0;
 			} else {
-				if (sample_i_l - 1 < 0) {
-					buffer_l[ last_delay_samples_l - 1 ] = input_l[i];
+				if (last_delay_samples == 0) {
+					*output = input * gain;
 				} else {
-					buffer_l[ sample_i_l - 1 ] = input_l[i];
+					if ((*sample_i) - 1 < 0) {
+						buffer[ last_delay_samples - 1 ] = input;
+					} else {
+						buffer[ (*sample_i) - 1 ] = input;
+					}
+					*output = buffer[ *sample_i ] * gain;
 				}
-				output_l[i] = buffer_l[ sample_i_l ] * gain_l_val;
 			}
+
+			(*sample_i)++;
 		}
 
-		sample_i_l++;
-
-		// left }}}2
-
-		// right {{{2
-
-		if (sample_i_r >= last_delay_samples_r) sample_i_r = 0;
-
-		if (sample_i_r < 0) {
-			output_r[i] = 0;
-			buffer_r[ sample_i_r + last_delay_samples_r ] = input_r[i];
-		} else {
-			if (last_delay_samples_r == 0) {
-				output_r[i] = input_r[i] * gain_r_val;
-			} else {
-				if (sample_i_r - 1 < 0) {
-					buffer_r[ last_delay_samples_r - 1 ] = input_r[i];
-				} else {
-					buffer_r[ sample_i_r - 1 ] = input_r[i];
-				}
-				output_r[i] = buffer_r[ sample_i_r ] * gain_r_val;
-			}
-		}
-
-		sample_i_r++;
-
-		// right }}}2
+		chProc(input_l[i], &output_l[i], buffer_l, &sample_i_l, last_delay_samples_l, gain_l_val);
+		chProc(input_r[i], &output_r[i], buffer_r, &sample_i_r, last_delay_samples_r, gain_r_val);
 
 	}
 } // run() }}}1
