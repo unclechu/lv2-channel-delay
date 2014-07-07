@@ -160,7 +160,7 @@ static void run ( // {{{1
 	uint32_t i;
 	for (i=0; i<n_samples; i++) {
 
-		void chProc(
+		inline void chProc(
 			float input,
 			float *output,
 			float *buffer,
